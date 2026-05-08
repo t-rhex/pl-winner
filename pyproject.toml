@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pl-winner"
+version = "0.2.0"
+description = "Premier League predictor: Dixon-Coles + Monte Carlo + FPL recommender (TUI / web / CLI)."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Andrew Adhikari" }]
+requires-python = ">=3.9"
+keywords = ["football", "premier-league", "fpl", "fantasy", "dixon-coles", "monte-carlo", "betting", "elo"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Games/Entertainment",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "scipy>=1.11",
+    "matplotlib>=3.7",
+    "tqdm>=4.66",
+    "textual>=0.60",
+    "rich>=13.7",
+    "pulp>=2.7",
+]
+
+[project.optional-dependencies]
+web = ["streamlit>=1.28", "plotly>=5.17"]
+notebook = ["jupyter>=1.0"]
+dev = ["pytest>=7.4", "pytest-cov>=4.1", "ruff>=0.5"]
+
+[project.urls]
+Homepage = "https://github.com/t-rhex/pl-winner"
+Issues = "https://github.com/t-rhex/pl-winner/issues"
+
+[project.scripts]
+pl-winner = "pl_winner.cli:main"
+
+[tool.setuptools]
+package-dir = { "pl_winner" = "src", "pl_winner.commands" = "src/commands" }
+packages = ["pl_winner", "pl_winner.commands"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+pl_winner = ["../app/streamlit_app.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+filterwarnings = [
+    "ignore::DeprecationWarning:pulp.*",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "RET"]
+ignore = [
+    "E501",   # line length already enforced by formatter
+    "B008",   # function call in argument default — common pattern in this codebase
+    "UP045",  # `X | None` requires py310; we support 3.9
+    "B007",   # unused loop variable (often intentional for readability)
+    "B023",   # function-def captures loop variable (intentional in narrow scopes)
+    "RET504", # unnecessary-assignment-before-return is sometimes clearer
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]

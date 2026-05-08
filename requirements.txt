@@ -1,0 +1,12 @@
+pandas>=2.0
+numpy>=1.24
+scipy>=1.11
+matplotlib>=3.7
+tqdm>=4.66
+jupyter>=1.0
+textual>=0.60
+rich>=13.7
+pulp>=2.7
+pytest>=7.4
+streamlit>=1.28
+plotly>=5.17

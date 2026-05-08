@@ -1,0 +1,17 @@
+.venv
+.git
+.github
+.pytest_cache
+.ruff_cache
+__pycache__
+*.pyc
+*.pyo
+data/
+docs/
+notebooks/
+tests/
+*.svg
+*.ipynb
+.DS_Store
+.coverage
+coverage.xml

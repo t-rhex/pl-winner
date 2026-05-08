@@ -1,0 +1,10 @@
+services:
+  pl-winner:
+    build: .
+    image: pl-winner:latest
+    container_name: pl-winner
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
