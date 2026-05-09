@@ -2,6 +2,9 @@
 
 [![CI](https://github.com/t-rhex/pl-winner/actions/workflows/ci.yml/badge.svg)](https://github.com/t-rhex/pl-winner/actions/workflows/ci.yml)
 [![Deploy](https://github.com/t-rhex/pl-winner/actions/workflows/deploy.yml/badge.svg)](https://github.com/t-rhex/pl-winner/actions/workflows/deploy.yml)
+[![CodeQL](https://github.com/t-rhex/pl-winner/actions/workflows/codeql.yml/badge.svg)](https://github.com/t-rhex/pl-winner/actions/workflows/codeql.yml)
+[![Security](https://github.com/t-rhex/pl-winner/actions/workflows/security.yml/badge.svg)](https://github.com/t-rhex/pl-winner/actions/workflows/security.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/t-rhex/pl-winner/badge)](https://scorecard.dev/viewer/?uri=github.com/t-rhex/pl-winner)
 [![Live](https://img.shields.io/website?url=https%3A%2F%2Fpl.andrewadhikari.com%2F_stcore%2Fhealth&label=pl.andrewadhikari.com&up_message=live&down_message=down)](https://pl.andrewadhikari.com)
 [![PyPI](https://img.shields.io/pypi/v/pl-winner.svg)](https://pypi.org/project/pl-winner/)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)

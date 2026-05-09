@@ -16,6 +16,10 @@ kill_timeout = "10s"
   STREAMLIT_BROWSER_GATHER_USAGE_STATS = "false"
   STREAMLIT_SERVER_ENABLE_CORS = "false"
   STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION = "true"
+  STREAMLIT_SERVER_FILE_WATCHER_TYPE = "none"   # disable inotify watcher (defense-in-depth)
+  STREAMLIT_LOGGER_LEVEL = "warning"
+  STREAMLIT_HOME = "/tmp/streamlit"
+  XDG_CACHE_HOME = "/tmp/cache"
   PL_WINNER_DATA_DIR = "/data"
   PYTHONUNBUFFERED = "1"
 

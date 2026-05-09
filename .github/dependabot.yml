@@ -1,0 +1,61 @@
+version: 2
+updates:
+  # Python dependencies (pyproject.toml)
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - python
+    reviewers:
+      - t-rhex
+    commit-message:
+      prefix: "deps(py)"
+      include: scope
+    groups:
+      # Group all minor/patch bumps into a single PR per week
+      runtime-minor-patch:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+        patterns: ["*"]
+        exclude-patterns: ["pulp", "scipy", "numpy", "pandas"]  # core libs reviewed individually
+      security-patches:
+        applies-to: security-updates
+        update-types: ["minor", "patch"]
+        patterns: ["*"]
+
+  # GitHub Actions versions
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: "deps(ci)"
+      include: scope
+    groups:
+      actions-minor-patch:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+        patterns: ["*"]
+
+  # Docker base image
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - docker
+    commit-message:
+      prefix: "deps(docker)"

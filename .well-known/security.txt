@@ -1,0 +1,9 @@
+# RFC 9116 security.txt — security disclosure metadata.
+# Verify online: https://securitytxt.org/
+
+Contact: https://github.com/t-rhex/pl-winner/security/advisories/new
+Expires: 2027-01-01T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://pl.andrewadhikari.com/.well-known/security.txt
+Policy: https://github.com/t-rhex/pl-winner/blob/main/SECURITY.md
+Acknowledgments: https://github.com/t-rhex/pl-winner/security/advisories

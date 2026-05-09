@@ -1,0 +1,23 @@
+# Code owners — everything routes to @t-rhex by default.
+# Sensitive paths (workflows, deploy config) require explicit review.
+# Reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+* @t-rhex
+
+# Workflow / CI changes touch supply-chain trust boundaries.
+/.github/workflows/ @t-rhex
+/.github/dependabot.yml @t-rhex
+
+# Deploy / infra changes can break or expose the production app.
+/Dockerfile @t-rhex
+/fly.toml @t-rhex
+/docker-compose.yml @t-rhex
+/DEPLOY.md @t-rhex
+
+# Anything affecting the release pipeline.
+/pyproject.toml @t-rhex
+/tools/bump_version.py @t-rhex
+
+# Security policy / docs.
+/SECURITY.md @t-rhex
+/CODE_OF_CONDUCT.md @t-rhex

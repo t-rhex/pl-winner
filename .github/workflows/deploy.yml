@@ -1,10 +1,5 @@
 name: Deploy
 
-# Auto-deploy to Fly.io after CI passes on main.
-#
-# Setup (one-off): see DEPLOY.md.
-# Required secret: FLY_API_TOKEN  (Settings → Secrets → Actions)
-
 on:
   workflow_run:
     workflows: ["CI"]
@@ -12,33 +7,50 @@ on:
     types: [completed]
   workflow_dispatch:
 
-# Avoid two deploys racing each other (e.g. a backlog after CI re-runs)
 concurrency:
   group: deploy-fly
   cancel-in-progress: false
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   deploy:
-    # Only deploy if CI succeeded (or if manually triggered)
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     environment:
       name: production
       url: https://pl.andrewadhikari.com
     steps:
-      - uses: actions/checkout@v4
+      - name: Harden runner
+        uses: step-security/harden-runner@002fdce3c6a235733a90a27c80493a3241e56863  # v2.12.1
+        with:
+          egress-policy: audit
+          allowed-endpoints: >
+            api.fly.io:443
+            api.machines.dev:443
+            registry.fly.io:443
+            github.com:443
+            objects.githubusercontent.com:443
+            pl-winner.fly.dev:443
 
-      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          persist-credentials: false
+
+      - uses: superfly/flyctl-actions/setup-flyctl@e36e95ed46cd998f63d76d49d0f9f5dab5ddc59c  # master
+        with:
+          version: latest
 
       - name: Pre-deploy sanity check
         run: |
           flyctl version
           flyctl status --app pl-winner || echo "App not yet provisioned"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Deploy
         run: flyctl deploy --remote-only --strategy rolling
@@ -47,7 +59,6 @@ jobs:
 
       - name: Smoke-test the live URL
         run: |
-          # Wait briefly for the new machine(s) to come online
           for i in {1..12}; do
             STATUS=$(curl -sk -o /dev/null -w "%{http_code}" https://pl-winner.fly.dev/_stcore/health || true)
             if [ "$STATUS" = "200" ]; then
@@ -66,8 +77,10 @@ jobs:
       - name: Annotate run summary
         if: success()
         run: |
-          echo "## ✓ Deployed pl-winner to Fly.io" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- 🌐 https://pl.andrewadhikari.com" >> "$GITHUB_STEP_SUMMARY"
-          echo "- 🛫 https://pl-winner.fly.dev" >> "$GITHUB_STEP_SUMMARY"
-          echo "- 📊 \`flyctl status --app pl-winner\`" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## ✓ Deployed pl-winner to Fly.io"
+            echo ""
+            echo "- 🌐 https://pl.andrewadhikari.com"
+            echo "- 🛫 https://pl-winner.fly.dev"
+            echo "- 📊 \`flyctl status --app pl-winner\`"
+          } >> "$GITHUB_STEP_SUMMARY"
