@@ -32,6 +32,9 @@ data/
 .vscode/
 *.swp
 
+# Claude Code session artifacts
+.claude/
+
 # Notebooks
 .ipynb_checkpoints/
 
