@@ -1,6 +1,8 @@
 # pl-winner
 
 [![CI](https://github.com/t-rhex/pl-winner/actions/workflows/ci.yml/badge.svg)](https://github.com/t-rhex/pl-winner/actions/workflows/ci.yml)
+[![Deploy](https://github.com/t-rhex/pl-winner/actions/workflows/deploy.yml/badge.svg)](https://github.com/t-rhex/pl-winner/actions/workflows/deploy.yml)
+[![Live](https://img.shields.io/website?url=https%3A%2F%2Fpl.andrewadhikari.com%2F_stcore%2Fhealth&label=pl.andrewadhikari.com&up_message=live&down_message=down)](https://pl.andrewadhikari.com)
 [![PyPI](https://img.shields.io/pypi/v/pl-winner.svg)](https://pypi.org/project/pl-winner/)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
