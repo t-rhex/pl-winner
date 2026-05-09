@@ -12,9 +12,14 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from src.tui import load_everything
+# Support both layouts:
+#   - Installed (Docker / pip install): import as `pl_winner.*`
+#   - Dev checkout without install:    add ../src to sys.path and import as `src.*`
+try:
+    from pl_winner.tui import load_everything
+except ModuleNotFoundError:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+    from tui import load_everything  # type: ignore[no-redef]
 
 
 @st.cache_resource(show_spinner="Loading data, fitting Dixon-Coles, simulating 10k seasons...")
@@ -128,7 +133,10 @@ def league_page(d):
     top = st.number_input("Top N entries (if league ID)", value=10, min_value=2, max_value=50)
     runs = st.number_input("Simulation runs", value=2000, min_value=500, max_value=20000, step=500)
     if st.button("Simulate"):
-        from src.league import fetch_league, simulate_league
+        try:
+            from pl_winner.league import fetch_league, simulate_league
+        except ModuleNotFoundError:
+            from league import fetch_league, simulate_league  # type: ignore[no-redef]
         if league_id:
             league = fetch_league(int(league_id))
             entries = [e["entry"] for e in league["standings"]["results"][:top]]
