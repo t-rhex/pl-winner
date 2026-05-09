@@ -80,6 +80,29 @@ pytest -k "not network"
 - Type hints encouraged; not yet strictly enforced
 - Prefer small focused modules; ~400 lines is the upper bound
 
+## Releasing
+
+Two paths:
+
+**One-click (preferred):** GitHub Actions → "Cut release" → pick a bump type
+(`patch`/`minor`/`major` or an explicit `X.Y.Z`) → Run. The workflow runs full
+CI on the bumped version, commits, tags, pushes — which triggers `release.yml`
+to publish to PyPI and create a GitHub Release.
+
+**Local:**
+
+```bash
+python tools/bump_version.py patch         # bumps pyproject.toml + CHANGELOG + __init__ + USER_AGENT
+make release-check                         # ensures wheel + sdist build clean
+git commit -am "Release v$(grep '^version' pyproject.toml | cut -d'"' -f2)"
+git tag "v$(grep '^version' pyproject.toml | cut -d'"' -f2)"
+git push origin HEAD --tags
+```
+
+The `release.yml` workflow takes it from there. **Never publish manually with
+`twine upload`** — that requires a stored API token and bypasses the OIDC trust
+chain.
+
 ## Reporting bugs
 
 Open an issue with: Python version, platform, what you ran, what happened, what you expected. A minimal repro is gold.

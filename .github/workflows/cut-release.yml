@@ -1,0 +1,77 @@
+name: Cut release
+
+# Click "Run workflow" on the Actions tab to bump the version + tag.
+# The tag push triggers release.yml which actually publishes to PyPI.
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump (patch / minor / major / explicit X.Y.Z)"
+        required: true
+        default: patch
+        type: string
+      dry_run:
+        description: "Dry-run only (no commit, no tag, no push)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  cut:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version + roll CHANGELOG
+        id: bump
+        run: |
+          python tools/bump_version.py "${{ inputs.bump }}"
+          NEW_VERSION=$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "## Bumped to v$NEW_VERSION" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validate the build still passes
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          ruff check src tests
+          pytest tests -q
+          pip install --quiet --upgrade build twine
+          python -m build
+          twine check dist/*
+
+      - name: Show diff
+        run: git diff --stat HEAD
+
+      - name: Commit, tag, and push
+        if: ${{ !inputs.dry_run }}
+        run: |
+          NEW="${{ steps.bump.outputs.new_version }}"
+          TAG="${{ steps.bump.outputs.tag }}"
+          git add pyproject.toml CHANGELOG.md src/__init__.py src/http_utils.py
+          git commit -m "Release $TAG"
+          git tag -a "$TAG" -m "pl-winner $NEW"
+          git push origin HEAD "$TAG"
+          echo "🚀 Pushed tag $TAG — release.yml will publish to PyPI." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Dry-run summary
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo "Dry-run: would commit + tag v${{ steps.bump.outputs.new_version }} but no changes pushed." >> "$GITHUB_STEP_SUMMARY"

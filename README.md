@@ -163,13 +163,37 @@ vulnerabilities.
 
 ## Releases
 
-Tag a commit with `vX.Y.Z` to publish to PyPI via GitHub Actions
-(uses [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/) — no
-API tokens stored anywhere).
+Three workflows automate the entire release flow — no API tokens stored
+anywhere (uses [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/)).
+
+| Workflow | Trigger | What it does |
+|---|---|---|
+| `ci.yml` | push, PR | tests + ruff + smoke on Python 3.10/3.11/3.12 |
+| `testpypi.yml` | push to main | builds a `.devN` wheel and uploads to TestPyPI; catches build regressions before users see them |
+| `cut-release.yml` | manual (Actions tab) | bumps version + CHANGELOG, commits, tags, pushes |
+| `release.yml` | tag `v*` push | builds, twine-checks, smoke-installs, publishes to PyPI, creates a GitHub Release |
+
+### Cut a new release (one click)
+
+[Run the **Cut release** workflow](https://github.com/t-rhex/pl-winner/actions/workflows/cut-release.yml)
+with a bump type (`patch` / `minor` / `major` / explicit `0.4.2`):
+
+```
+Actions → Cut release → Run workflow → bump: patch → Run
+```
+
+This handles the full chain: version bump → CHANGELOG roll → commit → tag →
+which triggers `release.yml` → which publishes to PyPI and drafts a GitHub
+release. End-to-end, ~3 minutes.
+
+### Or release locally
 
 ```bash
 make release-check          # build + twine check locally
-git tag v0.2.0 && git push --tags
+python tools/bump_version.py patch
+git commit -am "Release v$(grep '^version' pyproject.toml | cut -d'"' -f2)"
+git tag "v$(grep '^version' pyproject.toml | cut -d'"' -f2)"
+git push origin HEAD --tags
 ```
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
