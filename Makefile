@@ -78,6 +78,20 @@ docker-build:  ## Build the Docker image
 docker-run:  ## Run the web UI in Docker (port 8501)
 	docker compose up
 
+.PHONY: deploy
+deploy:  ## Deploy to Fly.io (requires flyctl + fly auth login)
+	flyctl deploy --remote-only
+
+.PHONY: deploy-status
+deploy-status:  ## Show Fly.io app status + logs
+	flyctl status --app pl-winner
+	@echo
+	flyctl logs --app pl-winner | tail -20
+
+.PHONY: deploy-logs
+deploy-logs:  ## Tail Fly.io logs
+	flyctl logs --app pl-winner
+
 .PHONY: release-check
 release-check: clean build  ## Verify the build is releasable
 	$(PIP) install --quiet --upgrade twine

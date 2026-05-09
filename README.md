@@ -52,6 +52,10 @@ docker compose up
 # → http://localhost:8501
 ```
 
+### 4. Or just visit the live demo
+
+🌐 **https://pl.andrewadhikari.com** — same app, deployed to Fly.io, auto-updated on every commit. See [DEPLOY.md](DEPLOY.md) for how it's wired up.
+
 ## What you get
 
 | Command | Output |
@@ -169,9 +173,9 @@ anywhere (uses [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publisher
 | Workflow | Trigger | What it does |
 |---|---|---|
 | `ci.yml` | push, PR | tests + ruff + smoke on Python 3.10/3.11/3.12 |
-| `testpypi.yml` | push to main | builds a `.devN` wheel and uploads to TestPyPI; catches build regressions before users see them |
 | `cut-release.yml` | manual (Actions tab) | bumps version + CHANGELOG, commits, tags, pushes |
 | `release.yml` | tag `v*` push | builds, twine-checks, smoke-installs, publishes to PyPI, creates a GitHub Release |
+| `deploy.yml` | CI passes on main | deploys the Streamlit app to Fly.io at `pl.andrewadhikari.com` |
 
 ### Cut a new release (one click)
 

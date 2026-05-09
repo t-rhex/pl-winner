@@ -1,0 +1,73 @@
+name: Deploy
+
+# Auto-deploy to Fly.io after CI passes on main.
+#
+# Setup (one-off): see DEPLOY.md.
+# Required secret: FLY_API_TOKEN  (Settings → Secrets → Actions)
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+
+# Avoid two deploys racing each other (e.g. a backlog after CI re-runs)
+concurrency:
+  group: deploy-fly
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    # Only deploy if CI succeeded (or if manually triggered)
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://pl.andrewadhikari.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Pre-deploy sanity check
+        run: |
+          flyctl version
+          flyctl status --app pl-winner || echo "App not yet provisioned"
+
+      - name: Deploy
+        run: flyctl deploy --remote-only --strategy rolling
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Smoke-test the live URL
+        run: |
+          # Wait briefly for the new machine(s) to come online
+          for i in {1..12}; do
+            STATUS=$(curl -sk -o /dev/null -w "%{http_code}" https://pl-winner.fly.dev/_stcore/health || true)
+            if [ "$STATUS" = "200" ]; then
+              echo "✓ Healthy after ${i}x5s"
+              exit 0
+            fi
+            echo "  attempt $i: HTTP $STATUS — sleeping 5s"
+            sleep 5
+          done
+          echo "::error ::App did not become healthy in 60s"
+          flyctl logs --app pl-winner | tail -30
+          exit 1
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Annotate run summary
+        if: success()
+        run: |
+          echo "## ✓ Deployed pl-winner to Fly.io" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 🌐 https://pl.andrewadhikari.com" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 🛫 https://pl-winner.fly.dev" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 📊 \`flyctl status --app pl-winner\`" >> "$GITHUB_STEP_SUMMARY"

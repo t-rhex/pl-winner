@@ -1,0 +1,50 @@
+# fly.toml — pl-winner Streamlit deployment
+# Docs: https://fly.io/docs/reference/configuration/
+
+app = "pl-winner"
+primary_region = "iad"  # Washington, DC. Pick a region close to you: https://fly.io/docs/reference/regions/
+kill_signal = "SIGINT"
+kill_timeout = "10s"
+
+[build]
+  # We use the existing multi-stage Dockerfile.
+
+[env]
+  STREAMLIT_SERVER_PORT = "8501"
+  STREAMLIT_SERVER_ADDRESS = "0.0.0.0"
+  STREAMLIT_SERVER_HEADLESS = "true"
+  STREAMLIT_BROWSER_GATHER_USAGE_STATS = "false"
+  STREAMLIT_SERVER_ENABLE_CORS = "false"
+  STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION = "true"
+  PL_WINNER_DATA_DIR = "/data"
+  PYTHONUNBUFFERED = "1"
+
+[http_service]
+  internal_port = 8501
+  force_https = true
+  auto_stop_machines = "stop"     # scale to zero when idle (~30s of inactivity)
+  auto_start_machines = true      # wake up on the next incoming request
+  min_machines_running = 0
+  processes = ["app"]
+
+  # Streamlit exposes a health endpoint that doesn't require auth or load.
+  [[http_service.checks]]
+    grace_period = "30s"     # give Streamlit a moment to boot
+    interval = "15s"
+    method = "GET"
+    timeout = "5s"
+    path = "/_stcore/health"
+
+# 1GB shared-cpu is comfortable for pandas + scipy + pulp + streamlit + plotly.
+# Scale up if you see OOMs during simulation: `fly scale memory 2048`.
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
+
+# Persistent volume so FPL caches and the SQLite predictions DB survive restarts.
+# Create it once with: fly volumes create pl_winner_data --size 1 --region iad
+[[mounts]]
+  source = "pl_winner_data"
+  destination = "/data"
+  initial_size = "1gb"
